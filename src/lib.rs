@@ -7,8 +7,9 @@ use std::{
     sync::Arc,
     path::PathBuf,
     time::Duration,
+    pin::Pin,
 };
-use futures_core::future::{BoxFuture, Future};
+use std::future::Future;
 use tokio::{
     prelude::*,
     io::{self, BufStream},
@@ -36,7 +37,7 @@ pub const REQUEST_URI_MAX_LEN: usize = 1024;
 pub const GEMINI_PORT: u16 = 1965;
 
 pub (crate) type Handler = Arc<dyn Fn(Request) -> HandlerResponse + Send + Sync>;
-pub (crate) type HandlerResponse = BoxFuture<'static, Result<Response>>;
+pub (crate) type HandlerResponse = Pin<Box<dyn Future<Output = Result<Response>> + Send>>;
 
 #[derive(Clone)]
 pub struct Server {

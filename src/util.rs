@@ -13,7 +13,7 @@ use crate::types::{Document, document::HeadingLevel::*};
 use crate::types::Response;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::task::Poll;
-use futures_core::future::Future;
+use std::future::Future;
 use tokio::time;
 
 #[cfg(feature="serve_dir")]
