@@ -1,6 +1,4 @@
 use anyhow::*;
-use futures_core::future::BoxFuture;
-use futures_util::FutureExt;
 use log::LevelFilter;
 use northstar::{Document, document::HeadingLevel, Request, Response, GEMINI_PORT};
 
@@ -18,25 +16,19 @@ async fn main() -> Result<()> {
         .await
 }
 
-fn handle_base(_: Request) -> BoxFuture<'static, Result<Response>> {
+async fn handle_base(_: Request) -> Result<Response> {
     let doc = generate_doc("base");
-    async move {
-        Ok(Response::document(doc))
-    }.boxed()
+    Ok(Response::document(doc))
 }
 
-fn handle_short(_: Request) -> BoxFuture<'static, Result<Response>> {
+async fn handle_short(_: Request) -> Result<Response> {
     let doc = generate_doc("short");
-    async move {
-        Ok(Response::document(doc))
-    }.boxed()
+    Ok(Response::document(doc))
 }
 
-fn handle_long(_: Request) -> BoxFuture<'static, Result<Response>> {
+async fn handle_long(_: Request) -> Result<Response> {
     let doc = generate_doc("long");
-    async move {
-        Ok(Response::document(doc))
-    }.boxed()
+    Ok(Response::document(doc))
 }
 
 fn generate_doc(route_name: &str) -> Document {

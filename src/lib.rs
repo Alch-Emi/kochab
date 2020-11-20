@@ -8,7 +8,7 @@ use std::{
     path::PathBuf,
     time::Duration,
 };
-use futures_core::future::BoxFuture;
+use futures_core::future::{BoxFuture, Future};
 use tokio::{
     prelude::*,
     io::{self, BufStream},
@@ -290,11 +290,13 @@ impl<A: ToSocketAddrs> Builder<A> {
     /// "endpoint".  Entering a relative or malformed path will result in a panic.
     ///
     /// For more information about routing mechanics, see the docs for [`RoutingNode`].
-    pub fn add_route<H>(mut self, path: &'static str, handler: H) -> Self
+    pub fn add_route<F, H>(mut self, path: &'static str, handler: H) -> Self
     where
-        H: Fn(Request) -> HandlerResponse + Send + Sync + 'static,
+        H: Send + Sync + 'static + Fn(Request) -> F,
+        F: Send + Sync + 'static + Future<Output = Result<Response>>
     {
-        self.routes.add_route(path, Arc::new(handler));
+        let wrapped = Arc::new(move|req| Box::pin((handler)(req)) as HandlerResponse);
+        self.routes.add_route(path, wrapped);
         self
     }
 
