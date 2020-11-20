@@ -16,25 +16,27 @@ async fn main() -> Result<()> {
         .await
 }
 
-async fn handle_base(_: Request) -> Result<Response> {
-    let doc = generate_doc("base");
+async fn handle_base(req: Request) -> Result<Response> {
+    let doc = generate_doc("base", &req);
     Ok(Response::document(doc))
 }
 
-async fn handle_short(_: Request) -> Result<Response> {
-    let doc = generate_doc("short");
+async fn handle_short(req: Request) -> Result<Response> {
+    let doc = generate_doc("short", &req);
     Ok(Response::document(doc))
 }
 
-async fn handle_long(_: Request) -> Result<Response> {
-    let doc = generate_doc("long");
+async fn handle_long(req: Request) -> Result<Response> {
+    let doc = generate_doc("long", &req);
     Ok(Response::document(doc))
 }
 
-fn generate_doc(route_name: &str) -> Document {
+fn generate_doc(route_name: &str, req: &Request) -> Document {
+    let trailing = req.trailing_segments().join("/");
     let mut doc = Document::new();
     doc.add_heading(HeadingLevel::H1, "Routing Demo")
        .add_text(&format!("You're currently on the {} route", route_name))
+       .add_text(&format!("Trailing segments: /{}", trailing))
        .add_blank_line()
        .add_text("Here's some links to try:")
        .add_link_without_label("/")
