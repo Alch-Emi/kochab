@@ -36,13 +36,12 @@ pub use types::*;
 pub const REQUEST_URI_MAX_LEN: usize = 1024;
 pub const GEMINI_PORT: u16 = 1965;
 
-type Handler = Arc<dyn Fn(Request) -> HandlerResponse + Send + Sync>;
+type Handler = Box<dyn Fn(Request) -> HandlerResponse + Send + Sync>;
 pub (crate) type HandlerResponse = Pin<Box<dyn Future<Output = Result<Response>> + Send>>;
 
 #[derive(Clone)]
 pub struct Server {
     tls_acceptor: TlsAcceptor,
-    listener: Arc<TcpListener>,
     routes: Arc<RoutingNode<Handler>>,
     timeout: Duration,
     complex_timeout: Option<Duration>,
@@ -53,9 +52,9 @@ impl Server {
         Builder::bind(addr)
     }
 
-    async fn serve(self) -> Result<()> {
+    async fn serve(self, listener: TcpListener) -> Result<()> {
         loop {
-            let (stream, _addr) = self.listener.accept().await
+            let (stream, _addr) = listener.accept().await
                 .context("Failed to accept client")?;
             let this = self.clone();
 
@@ -298,7 +297,7 @@ impl<A: ToSocketAddrs> Builder<A> {
         H: Send + Sync + 'static + Fn(Request) -> F,
         F: Send + Sync + 'static + Future<Output = Result<Response>>
     {
-        let wrapped = Arc::new(move|req| Box::pin((handler)(req)) as HandlerResponse);
+        let wrapped = Box::new(move|req| Box::pin((handler)(req)) as HandlerResponse);
         self.routes.add_route(path, wrapped);
         self
     }
@@ -314,13 +313,12 @@ impl<A: ToSocketAddrs> Builder<A> {
 
         let server = Server {
             tls_acceptor: TlsAcceptor::from(config),
-            listener: Arc::new(listener),
             routes: Arc::new(self.routes),
             timeout: self.timeout,
             complex_timeout: self.complex_body_timeout_override,
         };
 
-        server.serve().await
+        server.serve(listener).await
     }
 }
 
