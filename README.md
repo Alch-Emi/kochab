@@ -15,8 +15,20 @@ specifcally want one of the WIP unstable features in development here.
 If you are interested in the outstanding PRs, please feel free to  check out the
 other branches in this repository, or browse the PRs on the upstream's page.
 
+I also manage a northstar fork called [kochab][2] on my GitLab.  While
+northstar aims to be a lightweight and minimal Gemini SDK, kochab is packed
+with features like user management, automatic routing, certificate generation,
+and the ability to run as an SCGI server instead of a raw gemini server, all
+toggleable with feature flags, allowing you to design exactly the library you
+need without the added bloat.
+
+Although they started as the same project, it's important to note that kochab
+and northstar have signifigantly diverged.  Choose the library that works best
+for your project.
+
 Thanks!
 
 💜
 
 [1]: https://github.com/panicbit/northstar
+[2]: https://gitlab.com/Alch_Emi/kochab
